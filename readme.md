@@ -19,7 +19,7 @@ Result:
 ```json
 {
   "name": "fred",
-  "active": true,
+  "active": false,
   "id": 42
 }
 ```
