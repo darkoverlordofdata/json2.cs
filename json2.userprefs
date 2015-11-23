@@ -1,1 +1,14 @@
-﻿<Properties StartupItem="json2/json2.csproj" />
+﻿<Properties StartupItem="json2/json2.csproj">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="readme.md">
+    <Files>
+      <File FileName="json2/Program.cs" Line="13" Column="35" />
+      <File FileName="json2/JSON.cs" Line="7" Column="1" />
+      <File FileName="readme.md" Line="18" Column="18" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
