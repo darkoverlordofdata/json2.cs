@@ -1,0 +1,5 @@
+/home/bruce/mono/json2/json2/obj/x86/Debug/.NETFramework,Version=v4.5.AssemblyAttribute.cs
+/home/bruce/mono/json2/json2/bin/Debug/json2.exe.mdb
+/home/bruce/mono/json2/json2/bin/Debug/json2.exe
+/home/bruce/mono/json2/json2/obj/x86/Debug/json2.exe
+/home/bruce/mono/json2/json2/obj/x86/Debug/json2.exe.mdb
