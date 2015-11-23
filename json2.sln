@@ -3,6 +3,12 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "json2", "json2\json2.csproj", "{D64DD65C-4B6F-46FF-8EE0-72DE8D5EF1D8}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9822EFF2-022B-4589-A6B3-5E88987FB172}"
+	ProjectSection(SolutionItems) = preProject
+		license.md = license.md
+		readme.md = readme.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -13,5 +19,7 @@ Global
 		{D64DD65C-4B6F-46FF-8EE0-72DE8D5EF1D8}.Debug|x86.Build.0 = Debug|x86
 		{D64DD65C-4B6F-46FF-8EE0-72DE8D5EF1D8}.Release|x86.ActiveCfg = Release|x86
 		{D64DD65C-4B6F-46FF-8EE0-72DE8D5EF1D8}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection
 EndGlobal
