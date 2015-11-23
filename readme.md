@@ -14,12 +14,15 @@ string str = JSON.Stringify(json, 2);
 Console.WriteLine(str);
 
 ```
+
+Result:
+```json
 {
   "name": "fred",
   "active": true,
   "id": 42
 }
-
+```
 
 
 # MIT License
