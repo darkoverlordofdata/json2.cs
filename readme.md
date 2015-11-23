@@ -24,6 +24,23 @@ Result:
 }
 ```
 
+### Unity
+
+version jsonx is built for compatability with unity's version of CSharp - 2.6.5+
+
+
+```csharp
+using jsonx;
+...
+
+var json = (JSONObject)JSON.Parse(@"{""name"": ""fred"", ""active"": true, ""id"": 42}");
+Console.WriteLine("Name = "+json["name"]);
+
+json["active"] = false;
+
+string str = JSON.Stringify(json, 2);
+Console.WriteLine(str);
+```
 
 # MIT License
 

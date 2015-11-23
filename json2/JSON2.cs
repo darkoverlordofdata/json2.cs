@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Dynamic;
-using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Collections.Generic;
 /**
 
     json2.cs
@@ -135,18 +134,22 @@ using System.Text.RegularExpressions;
 
 */
 
-namespace json2 {
+namespace jsonx {
 
-  /**
-     * This is the 'Standard' version, targetting .Net 4.5
+    /**
+     * This is the 'Unity' version, targetting .Net 2.6.5 tarball
      */
+    public class JSONObject : Dictionary<string, object> {}
+    public class JSONArray : List<object>  {}
+    public class JsonNode {}
+
     public class JsonSyntaxError : Exception {
         public JsonSyntaxError(string message, int lineno, string source) {
 
         }
     }
 
- 
+
 
   public class JSON {
 
@@ -154,31 +157,42 @@ namespace json2 {
 
     private static int at;      // The index of the current character
     private static string ch;   // The current character
-    private static Dictionary<string, string> escapee = new  Dictionary<string, string> 
-    {
-        ["\""] = "\"",
-        ["\\"] = "\\",
-        ["/"] = "/",
-        ["b"] = "\b",
-        ["f"] = "\f",
-        ["n"] = "\n",
-        ["r"] = "\r",
-        ["t"] = "\t"
-    };
-    private static Dictionary<string, string> meta = new  Dictionary<string, string> 
-    {
-        ["\b"] = "b",
-        ["\f"] = "f",
-        ["\n"] = "n",
-        ["\r"] = "r",
-        ["\t"] = "t",
-        ["\""] = "\\\"",
-        ["\\"] = "\\\\"
-    };
+
+    private static Dictionary<string, string> _escapee;
+    private static Dictionary<string, string> escapee {
+        get {
+            if (_escapee == null) {
+                _escapee = new Dictionary<string, string>();
+                _escapee.Add("b", "\b");
+                _escapee.Add("f", "\f");
+                _escapee.Add("n", "\n");
+                _escapee.Add("r", "\r");
+                _escapee.Add("t", "\t");
+
+            }
+            return _escapee;
+        }
+    }
+
+    private static Dictionary<string, string> _meta;
+    private static Dictionary<string, string> meta {
+        get {
+            if (_meta == null) {
+                _meta = new Dictionary<string, string>();
+                _meta.Add("\b", "b");
+                _meta.Add("\f", "f");
+                _meta.Add("\n", "n");
+                _meta.Add("\r", "r");
+                _meta.Add("\t", "t");
+                _meta.Add("\\", "\\\\");
+            }
+            return _meta;
+        }
+    }
 
     private static string text;
 
-    private static bool IsNumber(dynamic value) {
+    private static bool IsNumber(object value) {
         return value is sbyte
             || value is byte
             || value is short
@@ -195,7 +209,15 @@ namespace json2 {
     static string gap;
     static string indent;
 
-    public static string Stringify(dynamic value, dynamic space=null) {
+    public static JSONArray Array(object value) {
+        return (JSONArray)value;
+    }
+
+    public static JSONObject Object(object value) {
+        return (JSONObject)value;
+    }
+
+    public static string Stringify(object value, object space=null) {
 
         // The stringify method takes a value and an optional replacer, and an optional
         // space parameter, and returns a JSON text. The replacer can be a function
@@ -210,33 +232,33 @@ namespace json2 {
         // If the space parameter is a number, make an indent string containing that
         // many spaces.
         if (IsNumber(space)) {
-            for (i = 0; i < space; i += 1) {
+            for (i = 0; i < (int)space; i += 1) {
                 indent += ' ';
             }
         }
 
         // If the space parameter is a string, it will be used as the indent string.
         if (space is String) {
-            indent = space;
+            indent = (string)space;
         }
  
         // Make a fake root object containing our value under the key of ''.
         // Return the result of stringifying the value.
-        dynamic root = new ExpandoObject();
-        var iroot = (IDictionary<string, object>)root;
+        var root = new JSONObject();
+        var iroot = (JSONObject)root;
         iroot.Add("", value);
 
         return Str("", root);
     }
 
-    public static dynamic Parse(string source) {
+    public static object Parse(string source) {
 
         // This is a function that can parse a JSON text, producing a JavaScript
         // data structure. It is a simple, recursive descent parser. It does not use
         // eval or regular expressions, so it can be used as a model for implementing
         // a JSON parser in other languages.
 
-        dynamic result;
+        object result;
 
         text = source;
         at = 0;
@@ -271,33 +293,34 @@ namespace json2 {
         
     }
 
-    static string Str(dynamic key, dynamic holder) {
+    static string Str(object key, object holder) {
         // Produce a string from holder[key].
 
-        int i = 0;          // The loop counter.
-        int length = 0;
-        string mind = gap;
+      int i = 0;              // The loop counter.
+      int length = 0;
+      string mind = gap;
 
-      IDictionary<string, object> ihash = holder as IDictionary<string, object>;
-      List<dynamic> ilist = holder as List<dynamic>;
 
-      var value = ihash == null ? ilist[key] : ihash[key];
+      var ihash = holder as JSONObject;
+      var ilist= holder as JSONArray;
+
+      var value = ihash == null ? ilist[(int)key] : ihash[(string)key];
 
       // What happens next depends on the value's type.
       if (value is String) {
-        return Quote(value);
+        return Quote((string)value);
       } else if (IsNumber(value)) {
         return Convert.ToString(value);
       } else if (value is Boolean) {
         return Convert.ToString(value).ToLower();
-      } else if (value is List<dynamic>) {
+      } else if (value is JSONArray) {
 
         // The value is an array. Stringify every element. Use null as a placeholder
         // for non-JSON values.
 
         gap += indent;
-        List<dynamic> array = value as List<dynamic>;
-        List<string> results = new List<string>();
+        var array = value as JSONArray;
+        var results = new List<string>();
         length = array.Count;
         for (i=0; i<length; i++) {
             results.Add(Str(i, value));
@@ -309,18 +332,18 @@ namespace json2 {
        string v = results.Count == 0
             ? "[]"
             : gap.Length > 0
-                ? "[\n" + gap + string.Join(",\n"+gap, results) +  "\n" + mind + "]"
-                : "[" + string.Join(", ", results) + "]";
+                ? "[\n" + gap + string.Join(",\n"+gap, results.ToArray()) +  "\n" + mind + "]"
+                : "[" + string.Join(", ", results.ToArray()) + "]";
         gap = mind;
         return v;
 
-      } else if (value is ExpandoObject) {
+      } else if (value is JSONObject) {
 
         // Otherwise, iterate through all of the keys in the object.
 
         gap += indent;
-        IDictionary< string, object > dictionary = value as IDictionary< string, object >;
-        List<string> results = new List<string>();
+        var dictionary = value as Dictionary< string, object >;
+        var results = new List<string>();
         foreach (KeyValuePair< string, object > pair in dictionary) {
             results.Add(Quote(pair.Key) + (
                 gap.Length > 0 
@@ -335,8 +358,8 @@ namespace json2 {
         string v = results.Count == 0
             ? "{}"
             : gap.Length > 0
-                ? "{\n" + gap + string.Join(",\n" + gap, results) + "\n" + mind + "}"
-                : "{" + string.Join(", ", results) + "}";
+                ? "{\n" + gap + string.Join(",\n" + gap, results.ToArray()) + "\n" + mind + "}"
+                : "{" + string.Join(", ", results.ToArray()) + "}";
          gap = mind;
         return v;
       }
@@ -367,7 +390,7 @@ namespace json2 {
         return ch;
     }
 
-    static dynamic Number() {
+    static object Number() {
         // Parse a number value.
         float number = 0.0f;
         string str = "";
@@ -386,10 +409,10 @@ namespace json2 {
                 str += ch;
             }
         }
-        if (ch == "e" || ch == "E") {
+        if (IsChar("eE")) {
             str += ch;
             Next();
-            if (ch == "-" || ch == "+") {
+            if (IsChar("-+")) {
                 str += ch;
                 Next();
             }
@@ -403,7 +426,7 @@ namespace json2 {
         return number;
     }
 
-    static dynamic String() {
+    static object String() {
         // Parse a string value.
         int hex;
         int i;
@@ -446,7 +469,7 @@ namespace json2 {
         }
     }
 
-    static dynamic Word() {
+    static object Word() {
         // true, false, or null.
         switch(ch) {
         case "t":
@@ -473,9 +496,9 @@ namespace json2 {
 
     }
 
-    static List<dynamic>  Array() {
+    static JSONArray  Array() {
         // Parse an array value.
-        List<dynamic> array = new List<dynamic>();
+        var array = new JSONArray();
 
         if (ch == "[") {
             Next("[");
@@ -498,10 +521,36 @@ namespace json2 {
         throw Error("Bad array");
     }
 
-    static dynamic Object() {
+    /*
+    static JSONArray  Array() {
+        // Parse an array value.
+        JSONArray array = new JSONArray();
+
+        if (ch == "[") {
+            Next("[");
+            White();
+            if (ch == "]") {
+                Next("]");
+                return array;
+            }
+            while (ch.Length>0) {
+                array.Add(Value());
+                White();
+                if (ch == "]") {
+                    Next("]");
+                    return array;
+                }
+                Next(",");
+                White();
+            }
+        }
+        throw Error("Bad array");
+    }*/
+
+    static object Object() {
         // Parse an object value.
         string key = "";
-        dynamic obj = new ExpandoObject();
+        var obj = new JSONObject();
 
         if (ch == "{") {
             Next("{");
@@ -511,11 +560,10 @@ namespace json2 {
                 return obj;
             }
             while (ch.Length>0) {
-                key = String();
+                key = (string)String();
                 White();
                 Next(":");
-                var iobj = (IDictionary<string, object>)obj;
-                iobj.Add(key, Value());
+                obj.Add(key, Value());
                 White();
                 if (ch == "}") {
                     Next("}");
@@ -528,7 +576,7 @@ namespace json2 {
         throw Error("Bad Object");
     }
 
-    static dynamic Value() {
+    static object Value() {
         // Parse a JSON value. It could be an object, an array, a string, a number,
         // or a word.
 
